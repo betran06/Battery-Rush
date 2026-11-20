@@ -1,33 +1,32 @@
-# Battery Rush
+﻿# Battery Rush
 
-Browser-based motion game MVP. React owns the game session state; Phaser renders the battery display. Webcam hand landmarks are processed locally by MediaPipe. No video is stored or uploaded.
+Battery Rush is a React, TypeScript, Vite, and Phaser motion game. Kinect V1 running-in-place is the primary challenge; the existing webcam/MediaPipe hand-wave adapter remains available in the UI. Kinect mode works without webcam permission or MediaPipe model access.
 
 ## Requirements
 
 - Node.js 20.19+ or 22.12+ and npm.
-- A modern desktop browser. Camera access requires localhost or HTTPS.
-- A compatible MediaPipe Hand Landmarker model at `public/models/hand_landmarker.task` for real tracking.
+- Windows with Kinect for Windows V1, Kinect Runtime/SDK 1.8, and the .NET Framework 4.8 Developer Pack for the bridge.
+- A modern desktop browser and the local Kinect Bridge at `ws://127.0.0.1:8181/kinect`.
 
-## Run locally
+## Run
 
 ```sh
 npm install
 npm run dev
-```
-
-Open the localhost address shown by Vite. Connect the camera and allow permission. If the model file is missing, camera access remains local and the UI displays an actionable error; obtain a compatible model from the official MediaPipe Hand Landmarker model documentation and place it at the path above. The MediaPipe WASM files are copied from the installed package into a local public path before development and production builds; tracking does not need a CDN.
-
-## Checks
-
-```sh
 npm run build
-npm run preview
 ```
 
-## Gameplay
+Start `kinect-bridge/KinectBridge/KinectBridge.csproj` from Visual Studio, then open the Vite localhost page and connect the Kinect panel. Full-body tracking starts a 2-second standing calibration; after it completes, start the round and alternate knee lifts. The experimental defaults are 10 cm knee lift, 250 ms minimum cycle interval, and 2% battery per valid cycle.
 
-Start a 45-second round and complete ten side-to-side hand-wave cycles. Each cycle adds 10% charge. Sensitivity can be adjusted in the controls. Play Again resets the round without refreshing.
+Webcam controls remain as a separate fallback and still use the local MediaPipe assets/model. Neither sensor sends video to a server.
 
-## Sensor architecture
+## Verification status
 
-`SensorSource` is the boundary for future sensor adapters. The MVP connects only the webcam adapter. Kinect Xbox 360, running-in-place detection, and device compatibility are intentionally not implemented or claimed.
+Frontend production build has been run. Kinect Bridge compilation, Windows 11 runtime, WebSocket hardware connection, calibration, and real running cycles have NOT HARDWARE VERIFIED. See `docs/TESTING.md` and `docs/KINECT_BRIDGE.md`.
+## Menghubungkan Kinect
+
+Kinect V1 adalah sensor utama untuk mode **KINECT RUN**. Sambungkan perangkat, jalankan bridge C# dari Visual Studio, lalu buka aplikasi dan pilih mode tersebut. Tekan **CONNECT** pada kartu Kinect; setelah skeleton tubuh terlacak, berdiri tegak selama kalibrasi 2 detik. Tombol mulai hanya menerima ronde Kinect setelah bridge tersambung dan kalibrasi selesai. Langkah build, endpoint, dan troubleshooting tersedia di `docs/KINECT_BRIDGE.md` serta `docs/KINECT_SETUP.md`.
+
+Mode webcam-wave tetap tersedia sebagai alternatif dan tidak dibutuhkan saat mode Kinect dipilih.
+
+Untuk memakai fallback webcam, pilih **WEBCAM WAVE** pada pemilih mode. Tracking webcam tetap menggunakan model MediaPipe lokal `public/models/hand_landmarker.task`; mode Kinect tidak membutuhkan izin kamera atau file model tersebut.

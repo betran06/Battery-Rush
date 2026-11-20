@@ -1,4 +1,4 @@
-# Battery Rush --- Project Plan
+﻿# Battery Rush --- Project Plan
 
 > **Dokumen instruksi untuk AI coding agent**\
 > Nama proyek: `battery-rush`\
@@ -24,9 +24,7 @@ Pengembangan dilakukan bertahap:
 3.  Arsitektur harus memungkinkan pergantian sumber sensor tanpa menulis
     ulang logika inti permainan.
 
-Untuk saat ini perangkat Kinect belum tersedia. Jangan
-mengimplementasikan atau mengklaim integrasi Kinect sudah berfungsi.
-Siapkan batas integrasinya saja.
+Kinect V1 dan skeleton tracking telah tersedia menurut pengujian pemilik project. Frontend Kinect sedang diintegrasikan; status aktual dicatat dalam docs/testing dan changelog. Jangan klaim komponen yang belum diuji berhasil.
 
 ## 2. Tujuan MVP
 
@@ -127,92 +125,92 @@ file konfigurasi tambahan.
 
 ``` text
 battery-rush/
-├── public/
-│   ├── assets/
-│   │   ├── images/
-│   │   ├── audio/
-│   │   └── sprites/
-│   └── models/
-│       └── README.md
-│
-├── src/
-│   ├── app/
-│   │   ├── App.tsx
-│   │   └── routes.ts
-│   │
-│   ├── components/
-│   │   ├── layout/
-│   │   │   ├── GameLayout.tsx
-│   │   │   └── FullscreenButton.tsx
-│   │   ├── camera/
-│   │   │   ├── CameraPreview.tsx
-│   │   │   └── CameraStatus.tsx
-│   │   ├── game/
-│   │   │   ├── BatteryDisplay.tsx
-│   │   │   ├── TimerDisplay.tsx
-│   │   │   └── MotionCounter.tsx
-│   │   └── result/
-│   │       └── ResultCard.tsx
-│   │
-│   ├── pages/
-│   │   ├── HomePage.tsx
-│   │   ├── GamePage.tsx
-│   │   ├── ResultPage.tsx
-│   │   └── SettingsPage.tsx
-│   │
-│   ├── game/
-│   │   ├── config/
-│   │   │   └── gameConfig.ts
-│   │   ├── scenes/
-│   │   │   ├── BootScene.ts
-│   │   │   ├── MenuScene.ts
-│   │   │   └── GameScene.ts
-│   │   ├── objects/
-│   │   │   └── Battery.ts
-│   │   ├── effects/
-│   │   │   └── ChargingEffect.ts
-│   │   ├── GameManager.ts
-│   │   └── PhaserGame.tsx
-│   │
-│   ├── sensors/
-│   │   ├── core/
-│   │   │   ├── SensorInterface.ts
-│   │   │   ├── SensorManager.ts
-│   │   │   └── SensorTypes.ts
-│   │   ├── webcam/
-│   │   │   ├── WebcamSensor.ts
-│   │   │   ├── CameraManager.ts
-│   │   │   └── MediaPipeProvider.ts
-│   │   ├── tracking/
-│   │   │   ├── HandTracker.ts
-│   │   │   └── PoseTracker.ts
-│   │   ├── detection/
-│   │   │   ├── HandWaveDetector.ts
-│   │   │   └── RunningDetector.ts
-│   │   └── kinect/
-│   │       ├── KinectSensor.ts
-│   │       └── README.md
-│   │
-│   ├── services/
-│   │   └── GameSessionService.ts
-│   ├── hooks/
-│   │   └── useCamera.ts
-│   ├── types/
-│   │   └── game.ts
-│   ├── utils/
-│   │   └── time.ts
-│   ├── styles/
-│   │   └── index.css
-│   ├── main.tsx
-│   └── vite-env.d.ts
-│
-├── .gitignore
-├── index.html
-├── package.json
-├── package-lock.json
-├── tsconfig.json
-├── vite.config.ts
-└── README.md
+â”œâ”€â”€ public/
+â”‚   â”œâ”€â”€ assets/
+â”‚   â”‚   â”œâ”€â”€ images/
+â”‚   â”‚   â”œâ”€â”€ audio/
+â”‚   â”‚   â””â”€â”€ sprites/
+â”‚   â””â”€â”€ models/
+â”‚       â””â”€â”€ README.md
+â”‚
+â”œâ”€â”€ src/
+â”‚   â”œâ”€â”€ app/
+â”‚   â”‚   â”œâ”€â”€ App.tsx
+â”‚   â”‚   â””â”€â”€ routes.ts
+â”‚   â”‚
+â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”œâ”€â”€ layout/
+â”‚   â”‚   â”‚   â”œâ”€â”€ GameLayout.tsx
+â”‚   â”‚   â”‚   â””â”€â”€ FullscreenButton.tsx
+â”‚   â”‚   â”œâ”€â”€ camera/
+â”‚   â”‚   â”‚   â”œâ”€â”€ CameraPreview.tsx
+â”‚   â”‚   â”‚   â””â”€â”€ CameraStatus.tsx
+â”‚   â”‚   â”œâ”€â”€ game/
+â”‚   â”‚   â”‚   â”œâ”€â”€ BatteryDisplay.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ TimerDisplay.tsx
+â”‚   â”‚   â”‚   â””â”€â”€ MotionCounter.tsx
+â”‚   â”‚   â””â”€â”€ result/
+â”‚   â”‚       â””â”€â”€ ResultCard.tsx
+â”‚   â”‚
+â”‚   â”œâ”€â”€ pages/
+â”‚   â”‚   â”œâ”€â”€ HomePage.tsx
+â”‚   â”‚   â”œâ”€â”€ GamePage.tsx
+â”‚   â”‚   â”œâ”€â”€ ResultPage.tsx
+â”‚   â”‚   â””â”€â”€ SettingsPage.tsx
+â”‚   â”‚
+â”‚   â”œâ”€â”€ game/
+â”‚   â”‚   â”œâ”€â”€ config/
+â”‚   â”‚   â”‚   â””â”€â”€ gameConfig.ts
+â”‚   â”‚   â”œâ”€â”€ scenes/
+â”‚   â”‚   â”‚   â”œâ”€â”€ BootScene.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ MenuScene.ts
+â”‚   â”‚   â”‚   â””â”€â”€ GameScene.ts
+â”‚   â”‚   â”œâ”€â”€ objects/
+â”‚   â”‚   â”‚   â””â”€â”€ Battery.ts
+â”‚   â”‚   â”œâ”€â”€ effects/
+â”‚   â”‚   â”‚   â””â”€â”€ ChargingEffect.ts
+â”‚   â”‚   â”œâ”€â”€ GameManager.ts
+â”‚   â”‚   â””â”€â”€ PhaserGame.tsx
+â”‚   â”‚
+â”‚   â”œâ”€â”€ sensors/
+â”‚   â”‚   â”œâ”€â”€ core/
+â”‚   â”‚   â”‚   â”œâ”€â”€ SensorInterface.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ SensorManager.ts
+â”‚   â”‚   â”‚   â””â”€â”€ SensorTypes.ts
+â”‚   â”‚   â”œâ”€â”€ webcam/
+â”‚   â”‚   â”‚   â”œâ”€â”€ WebcamSensor.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ CameraManager.ts
+â”‚   â”‚   â”‚   â””â”€â”€ MediaPipeProvider.ts
+â”‚   â”‚   â”œâ”€â”€ tracking/
+â”‚   â”‚   â”‚   â”œâ”€â”€ HandTracker.ts
+â”‚   â”‚   â”‚   â””â”€â”€ PoseTracker.ts
+â”‚   â”‚   â”œâ”€â”€ detection/
+â”‚   â”‚   â”‚   â”œâ”€â”€ HandWaveDetector.ts
+â”‚   â”‚   â”‚   â””â”€â”€ RunningDetector.ts
+â”‚   â”‚   â””â”€â”€ kinect/
+â”‚   â”‚       â”œâ”€â”€ KinectSensor.ts
+â”‚   â”‚       â””â”€â”€ README.md
+â”‚   â”‚
+â”‚   â”œâ”€â”€ services/
+â”‚   â”‚   â””â”€â”€ GameSessionService.ts
+â”‚   â”œâ”€â”€ hooks/
+â”‚   â”‚   â””â”€â”€ useCamera.ts
+â”‚   â”œâ”€â”€ types/
+â”‚   â”‚   â””â”€â”€ game.ts
+â”‚   â”œâ”€â”€ utils/
+â”‚   â”‚   â””â”€â”€ time.ts
+â”‚   â”œâ”€â”€ styles/
+â”‚   â”‚   â””â”€â”€ index.css
+â”‚   â”œâ”€â”€ main.tsx
+â”‚   â””â”€â”€ vite-env.d.ts
+â”‚
+â”œâ”€â”€ .gitignore
+â”œâ”€â”€ index.html
+â”œâ”€â”€ package.json
+â”œâ”€â”€ package-lock.json
+â”œâ”€â”€ tsconfig.json
+â”œâ”€â”€ vite.config.ts
+â””â”€â”€ README.md
 ```
 
 ### Aturan struktur
@@ -460,23 +458,11 @@ Acceptance criteria: - Tidak ada error runtime kritis pada alur utama. -
 Kamera selalu dibersihkan dengan benar. - Semua kondisi akhir game
 berjalan konsisten. - Production build berhasil.
 
-### Phase 6 --- Kinect Preparation (Belum Diimplementasikan)
+### Phase 6 --- Kinect Running Challenge
 
-Ketika perangkat tersedia: - Verifikasi model Kinect, adaptor daya/USB,
-sistem operasi, driver, dan SDK yang kompatibel. - Pastikan perangkat
-benar-benar dapat dibaca oleh middleware lokal. - Buat proses
-native/middleware terpisah untuk membaca skeleton/depth data. - Kirim
-data terstruktur ke aplikasi browser melalui mekanisme lokal yang aman,
-misalnya WebSocket. - Implementasikan adapter `KinectSensor` sesuai
-kontrak sensor. - Normalisasi data Kinect menjadi `MotionEvent`. - Uji
-tracking kaki dan deteksi langkah sebelum menghubungkannya ke game.
+Frontend memiliki adapter WebSocket `KinectSensor` dan `RunningDetector`. Bridge C# memakai Kinect SDK 1.8 dan endpoint loopback `ws://127.0.0.1:8181/kinect`. Running detector menggunakan kalibrasi 2 detik, ambang lutut 10 cm, interval minimum 250 ms, dan charge 2% per siklus sebagai nilai eksperimental. Build frontend lulus; bridge build, koneksi WebSocket, dan gameplay dengan perangkat nyata masih NOT HARDWARE VERIFIED.
 
-Penting: - Kinect Xbox 360 bukan webcam standar. - Jangan mengasumsikan
-`getUserMedia()` dapat membaca skeleton Kinect. - Jangan mengasumsikan
-Kinect SDK 1.8 kompatibel dengan semua versi Windows atau perangkat. -
-Verifikasi kompatibilitas berdasarkan perangkat dan environment yang
-benar-benar tersedia. - Jangan membuat kode integrasi palsu atau
-menyatakan fitur Kinect selesai sebelum diuji pada perangkat fisik.
+Penting: Kinect bukan webcam standar; pertahankan boundary antara SDK di bridge, WebSocket, adapter browser, detector, dan game state. Jangan menyatakan kompatibilitas Windows 11 atau gameplay selesai sebelum pengujian fisik.
 
 ## 10. UI/UX Direction
 
@@ -604,3 +590,7 @@ integrasi webcam, kemudian MediaPipe Hand Landmarker.
 
 **Prinsip utama proyek:** buktikan sensor dan deteksi gerakan terlebih
 dahulu; sempurnakan visual game setelah input gerakan terbukti stabil.
+
+## Catatan integrasi Kinect (18 November 2026)
+
+Project sudah memiliki frontend Kinect WebSocket adapter dan detektor running-in-place, sementara webcam/MediaPipe tetap tersedia. Lihat `docs/ARCHITECTURE.md`, `docs/KINECT_BRIDGE.md`, dan `docs/RUNNING_DETECTOR.md` untuk rancangan implementasi saat ini. Catatan lama pada dokumen ini yang menyatakan Kinect belum diimplementasikan menggambarkan kondisi sebelum integrasi frontend. Build frontend sudah lulus; Bridge dan permainan menggunakan sensor nyata masih **NOT HARDWARE VERIFIED**.

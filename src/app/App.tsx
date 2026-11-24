@@ -6,7 +6,8 @@ import { CameraManager } from '../sensors/webcam/CameraManager'
 import { HandWaveDetector } from '../sensors/detection/HandWaveDetector'
 import { RunningDetector } from '../sensors/detection/RunningDetector'
 import { KinectSensor, type KinectConnectionState } from '../sensors/kinect/KinectSensor'
-import type { CameraStatus, GamePhase } from '../types/game'
+import { SkeletonPreview } from './SkeletonPreview'
+import type { CameraStatus, GamePhase, KinectSkeletonFrame } from '../types/game'
 
 const CHARGE_PER_WAVE = 10
 const CHARGE_PER_RUN_CYCLE = 2
@@ -61,6 +62,9 @@ export default function App() {
   const [kinectStatus, setKinectStatus] = useState<KinectConnectionState>('disconnected')
   const [kinectMessage, setKinectMessage] = useState('Bridge belum tersambung')
   const [calibrationMessage, setCalibrationMessage] = useState('Sambungkan Kinect untuk kalibrasi')
+  const [latestKinectFrame, setLatestKinectFrame] = useState<KinectSkeletonFrame | null>(null)
+  const [showKinectPreview, setShowKinectPreview] = useState(true)
+  const [isKinectCalibrated, setIsKinectCalibrated] = useState(false)
   const [runCycles, setRunCycles] = useState(0)
   const [cameraMessage, setCameraMessage] = useState('Kamera belum dinyalakan')
   const [phase, setPhase] = useState<GamePhase>('welcome')
@@ -80,17 +84,44 @@ export default function App() {
   const detectorRef = useRef(new HandWaveDetector())
   const runningDetectorRef = useRef(new RunningDetector())
   const kinectRef = useRef<KinectSensor | null>(null)
+
   const connectKinect = () => {
     const sensor = new KinectSensor((frame) => {
+      setLatestKinectFrame(frame)
       const result = runningDetectorRef.current.update(frame)
-      if (result === 'tracking-lost') setCalibrationMessage('Skeleton tidak terlacak; berdiri penuh di depan sensor.')
-      else if (result === 'calibrating') setCalibrationMessage('Kalibrasi postur... berdiri tegak selama 2 detik.')
-      else if (result === 'calibrated') setCalibrationMessage('Kalibrasi siap; mulai berlari di tempat.')
-    }, (state, message) => { setKinectStatus(state); setKinectMessage(message) })
-    kinectRef.current?.stop(); kinectRef.current = sensor
+      if (result === 'tracking-lost') {
+        setIsKinectCalibrated(false)
+        setCalibrationMessage('Skeleton tidak terlacak; berdiri penuh di depan sensor.')
+      } else if (result === 'calibrating') {
+        setIsKinectCalibrated(false)
+        setCalibrationMessage('Kalibrasi postur... berdiri tegak selama 2 detik.')
+      } else if (result === 'calibrated') {
+        setIsKinectCalibrated(true)
+        setCalibrationMessage('Kalibrasi siap; mulai berlari di tempat.')
+      }
+    }, (state, message) => {
+      setKinectStatus(state)
+      setKinectMessage(message)
+      if (state !== 'connected') {
+        setLatestKinectFrame(null)
+        setIsKinectCalibrated(false)
+      }
+    })
+    kinectRef.current?.stop()
+    kinectRef.current = sensor
     void sensor.start().catch((error: unknown) => setKinectMessage(error instanceof Error ? error.message : 'Koneksi gagal.'))
   }
-  const disconnectKinect = () => { kinectRef.current?.stop(); kinectRef.current = null; runningDetectorRef.current.resetCalibration(); setKinectStatus('disconnected'); setKinectMessage('Bridge diputuskan') }
+
+  const disconnectKinect = () => {
+    kinectRef.current?.stop()
+    kinectRef.current = null
+    runningDetectorRef.current.resetCalibration()
+    setKinectStatus('disconnected')
+    setKinectMessage('Bridge diputuskan')
+    setLatestKinectFrame(null)
+    setIsKinectCalibrated(false)
+  }
+
   const gameHostRef = useRef<HTMLDivElement>(null)
   const phaserRef = useRef<Phaser.Game | null>(null)
   const cameraRequestRef = useRef(0)
@@ -146,7 +177,7 @@ export default function App() {
       cameraRef.current = camera
       setCameraStatus('active')
       setHandDetected(false)
-      setCameraMessage('Kamera aktif â€” menyiapkan hand tracking...')
+      setCameraMessage('Kamera aktif — menyiapkan hand tracking...')
       try {
         const runtime = await createVisionRuntime(videoRef.current, landmarkCanvasRef.current, {
           onFrame: (frame) => detectorRef.current.update(frame, sensitivityRef.current),
@@ -238,19 +269,18 @@ export default function App() {
     <div className="grain" aria-hidden="true" />
     <header className="topbar">
       <a className="brand" href="#home" onClick={(event) => { event.preventDefault(); setPhase('welcome') }}><span className="brand-mark"><BatteryCharging size={19} /></span> VOLT / PLAY</a>
-      <div className="topbar-right"><span className="edition"><span className="live-dot" /> MOTION ARCADE <i>Â·</i> 001</span><button className="icon-button fullscreen" onClick={toggleFullscreen} aria-label="Toggle fullscreen"><Expand size={17} /></button></div>
+      <div className="topbar-right"><span className="edition"><span className="live-dot" /> MOTION ARCADE <i>·</i> 001</span><button className="icon-button fullscreen" onClick={toggleFullscreen} aria-label="Toggle fullscreen"><Expand size={17} /></button></div>
     </header>
 
     <section className="stage">
       <div className="stage-copy">
         <div className="eyebrow"><span className="eyebrow-line" /> THE ENERGY IS YOURS</div>
-        
         <p className="lede">Run in place.<br />Charge the battery.</p>
         <div className="challenge-tag"><Hand size={15} /><span>CHALLENGE 01</span><b>RUNNING IN PLACE</b></div>
       </div>
 
       <div className="game-panel">
-        <div className="panel-head"><div><span className="panel-label">LIVE CHALLENGE</span><span className="panel-title">Charge sequence</span></div><span className="session-code">BRâ€”001</span></div>
+        <div className="panel-head"><div><span className="panel-label">LIVE CHALLENGE</span><span className="panel-title">Charge sequence</span></div><span className="session-code">BR—001</span></div>
         <div className="game-display">
           <div className="display-orbit orbit-one" /><div className="display-orbit orbit-two" />
           <div className="battery-wrap"><div className="phaser-holder" ref={gameHostRef} /><div className="battery-cap" /></div>
@@ -267,10 +297,39 @@ export default function App() {
 
     <section className="control-deck">
       <div className="sensor-mode-switch"><span className="panel-label">INPUT MODE</span><button className="camera-toggle" onClick={() => setSensorMode('kinect')} aria-pressed={sensorMode === 'kinect'} disabled={phase === 'playing' || phase === 'countdown'}>KINECT RUN</button><button className="camera-toggle" onClick={() => setSensorMode('webcam')} aria-pressed={sensorMode === 'webcam'} disabled={phase === 'playing' || phase === 'countdown'}>WEBCAM WAVE</button></div>
+      
       <div className="camera-card kinect-card">
-        <div className="camera-header"><div className="camera-heading"><span className={`camera-indicator ${kinectStatus === 'connected' ? 'active' : kinectStatus}`} /><div><strong>KINECT V1 LINK</strong><small>{kinectMessage}</small></div></div><button className="camera-toggle" onClick={kinectStatus === 'connected' ? disconnectKinect : connectKinect}><Camera size={15} /> {kinectStatus === 'connected' ? 'DISCONNECT' : 'CONNECT'}</button></div>
-        <div className="camera-foot"><span><ShieldCheck size={13} /> {calibrationMessage}</span><span className="sensor-label">RUNNING-IN-PLACE / SDK 1.8</span></div>
+        <div className="camera-header">
+          <div className="camera-heading">
+            <span className={`camera-indicator ${kinectStatus === 'connected' ? 'active' : kinectStatus}`} />
+            <div>
+              <strong>KINECT V1 LINK</strong>
+              <small>{kinectMessage}</small>
+            </div>
+          </div>
+          <button className="camera-toggle" onClick={kinectStatus === 'connected' ? disconnectKinect : connectKinect}>
+            <Camera size={15} /> {kinectStatus === 'connected' ? 'DISCONNECT' : 'CONNECT'}
+          </button>
+        </div>
+
+        <div className={`skeleton-preview ${showKinectPreview ? 'visible' : ''}`}>
+          <SkeletonPreview
+            frame={latestKinectFrame}
+            isConnected={kinectStatus === 'connected'}
+            isCalibrated={isKinectCalibrated}
+            calibrationMessage={calibrationMessage}
+            kneeLiftThresholdMeters={0.1}
+          />
+        </div>
+
+        <div className="camera-foot">
+          <span><ShieldCheck size={13} /> {calibrationMessage}</span>
+          <button onClick={() => setShowKinectPreview((value) => !value)}>
+            {showKinectPreview ? 'HIDE PREVIEW' : 'SHOW PREVIEW'}
+          </button>
+        </div>
       </div>
+
       <div className="camera-card">
         <div className="camera-header"><div className="camera-heading"><span className={`camera-indicator ${cameraStatus}`} /><div><strong>CAMERA LINK</strong><small>{cameraMessage}</small></div></div><button className="camera-toggle" onClick={cameraStatus === 'active' ? stopCamera : startCamera} disabled={cameraBusy}>{cameraStatus === 'active' ? <><CameraOff size={15} /> DISCONNECT</> : <><Camera size={15} /> {cameraBusy ? 'CONNECTING...' : 'CONNECT'}</>}</button></div>
         <div className={`camera-preview ${cameraStatus === 'active' && showPreview ? 'visible' : ''}`}>
@@ -279,11 +338,12 @@ export default function App() {
           {cameraStatus !== 'active' && <div className="preview-placeholder"><Camera size={18} /><span>CAMERA PREVIEW</span></div>}
           {cameraStatus === 'active' && <span className="preview-live"><i /> LIVE</span>}
         </div>
-        <div className="camera-foot"><span><ShieldCheck size={13} /> VIDEO STAYS ON DEVICE <b>{handDetected ? ' Â· HAND DETECTED' : ''}</b></span><button onClick={() => setShowPreview((value) => !value)}>{showPreview ? 'HIDE PREVIEW' : 'SHOW PREVIEW'}</button></div>
+        <div className="camera-foot"><span><ShieldCheck size={13} /> VIDEO STAYS ON DEVICE <b>{handDetected ? ' · HAND DETECTED' : ''}</b></span><button onClick={() => setShowPreview((value) => !value)}>{showPreview ? 'HIDE PREVIEW' : 'SHOW PREVIEW'}</button></div>
       </div>
+
       <div className="instructions-card"><div className="instructions-top"><span className="panel-label">HOW TO PLAY</span><span className="step-count">01 <i>/</i> 03</span></div><div className="instruction-main"><div className="instruction-icon"><Hand size={27} /></div><div><h2>Run it.<br /><em>Charge it.</em></h2><p>Stand where Kinect can see your full body, calibrate, then alternate knee lifts. Each valid run cycle adds 2%.</p></div></div><div className="instructions-bottom"><label htmlFor="sensitivity">SENSITIVITY <span>{Math.round(sensitivity * 100)}%</span></label><input id="sensitivity" type="range" min="6" max="24" value={Math.round(sensitivity * 100)} onChange={(event) => setSensitivity(Number(event.target.value) / 100)} /><span className="sensor-label">SENSOR <b>KINECT V1 / SKELETON TRACKING</b></span></div></div>
       <div className="launch-card"><div className="launch-orb"><span /></div><span className="launch-kicker">READY WHEN YOU ARE</span><button className="start-button" onClick={beginGame} disabled={phase === 'countdown' || phase === 'playing'}><span>{phase === 'won' || phase === 'lost' ? 'PLAY AGAIN' : 'START GAME'}</span><ChevronRight size={19} /></button><p><ShieldCheck size={12} /> {sensorMode === 'kinect' ? (kinectStatus === 'connected' ? calibrationMessage : 'Connect Kinect and complete calibration') : (cameraStatus === 'active' ? 'WEBCAM TRACKING READY' : 'Connect webcam for webcam mode')}</p></div>
     </section>
-    <footer className="footer"><span>BATTERY RUSH <i>Â©</i> 2026</span><span>NO DATA STORED <b>Â·</b> ALL PLAY, NO PLUG</span><a href="#about" onClick={(event) => event.preventDefault()}>BUILT FOR MOVEMENT <ChevronRight size={12} /></a></footer>
+    <footer className="footer"><span>BATTERY RUSH <i>©</i> 2026</span><span>NO DATA STORED <b>·</b> ALL PLAY, NO PLUG</span><a href="#about" onClick={(event) => event.preventDefault()}>BUILT FOR MOVEMENT <ChevronRight size={12} /></a></footer>
   </main>
 }

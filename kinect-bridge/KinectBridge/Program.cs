@@ -161,6 +161,14 @@ namespace KinectBridge
                     var rightKnee = tracked.Joints[JointType.KneeRight];
                     var leftAnkle = tracked.Joints[JointType.AnkleLeft];
                     var rightAnkle = tracked.Joints[JointType.AnkleRight];
+                    var head = tracked.Joints[JointType.Head];
+                    var shoulderCenter = tracked.Joints[JointType.ShoulderCenter];
+                    var shoulderLeft = tracked.Joints[JointType.ShoulderLeft];
+                    var shoulderRight = tracked.Joints[JointType.ShoulderRight];
+                    var spine = tracked.Joints[JointType.Spine];
+                    var footLeft = tracked.Joints[JointType.FootLeft];
+                    var footRight = tracked.Joints[JointType.FootRight];
+
                     long timestamp = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds;
                     json = "{\"type\":\"skeleton-frame\",\"tracking\":true,\"frame\":" + Interlocked.Increment(ref _frameNumber) +
                         ",\"timestamp\":" + timestamp +
@@ -168,7 +176,14 @@ namespace KinectBridge
                         ",\"kneeLeft\":" + JointJson(leftKnee) +
                         ",\"kneeRight\":" + JointJson(rightKnee) +
                         ",\"ankleLeft\":" + JointJson(leftAnkle) +
-                        ",\"ankleRight\":" + JointJson(rightAnkle) + "}}";
+                        ",\"ankleRight\":" + JointJson(rightAnkle) +
+                        ",\"head\":" + JointJson(head) +
+                        ",\"shoulderCenter\":" + JointJson(shoulderCenter) +
+                        ",\"shoulderLeft\":" + JointJson(shoulderLeft) +
+                        ",\"shoulderRight\":" + JointJson(shoulderRight) +
+                        ",\"spine\":" + JointJson(spine) +
+                        ",\"footLeft\":" + JointJson(footLeft) +
+                        ",\"footRight\":" + JointJson(footRight) + "}}";
                 }
                 _ = BroadcastAsync(json);
             }
@@ -210,5 +225,3 @@ namespace KinectBridge
         }
     }
 }
-
-

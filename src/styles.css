@@ -10,3 +10,8 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 
 .sensor-mode-switch{grid-column:1/-1;display:flex;align-items:center;gap:8px}.sensor-mode-switch .panel-label{margin-right:auto}.sensor-mode-switch [aria-pressed=true]{border-color:var(--lime);color:var(--lime)}
+
+.skeleton-preview{display:none;position:relative;height:clamp(150px,30vh,250px);aspect-ratio:4/3;margin-top:11px;background:#0e1411;border:1px solid #2b352d;overflow:hidden}
+.skeleton-preview.visible{display:block}
+.skeleton-preview canvas{width:100%;height:100%;object-fit:contain;display:block}
+.skeleton-preview.visible+.camera-foot{margin-top:9px}

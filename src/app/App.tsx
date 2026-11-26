@@ -1,16 +1,16 @@
 ﻿import { useCallback, useEffect, useRef, useState } from 'react'
-import { BatteryCharging, Camera, CameraOff, ChevronRight, Expand, Hand, RotateCcw, ShieldCheck, Sparkles, Timer } from 'lucide-react'
+import { BatteryCharging, ChevronLeft, ChevronRight, Expand, Hand, RotateCcw, Settings, ShieldCheck, Sparkles, Timer } from 'lucide-react'
 import Phaser from 'phaser'
 import { createVisionRuntime, type VisionRuntime } from '../sensors/webcam/MediaPipeProvider'
 import { CameraManager } from '../sensors/webcam/CameraManager'
 import { HandWaveDetector } from '../sensors/detection/HandWaveDetector'
 import { RunningDetector } from '../sensors/detection/RunningDetector'
 import { KinectSensor, type KinectConnectionState } from '../sensors/kinect/KinectSensor'
-import { SkeletonPreview } from './SkeletonPreview'
+import { SettingsView } from './SettingsView'
 import type { CameraStatus, GamePhase, KinectSkeletonFrame } from '../types/game'
 
 const CHARGE_PER_WAVE = 10
-const CHARGE_PER_RUN_CYCLE = 2
+const CHARGE_PER_RUN_CYCLE = 4
 const SCORE_CURVE = [
   [0, 100], [7, 100], [8, 98], [9, 97], [10, 96], [12, 94], [15, 90],
   [20, 84], [30, 72], [45, 54], [60, 36], [90, 15], [120, 5], [180, 1],
@@ -25,7 +25,6 @@ function scoreForElapsedSeconds(elapsedSeconds: number): number {
       return Math.max(1, Math.min(100, Math.round(startScore + (endScore - startScore) * progress)))
     }
   }
-
   return 1
 }
 
@@ -57,6 +56,7 @@ class BatteryScene extends Phaser.Scene {
 }
 
 export default function App() {
+  const [view, setView] = useState<'game' | 'setting'>('game')
   const [cameraStatus, setCameraStatus] = useState<CameraStatus>('idle')
   const [sensorMode, setSensorMode] = useState<'kinect' | 'webcam'>('kinect')
   const [kinectStatus, setKinectStatus] = useState<KinectConnectionState>('disconnected')
@@ -84,6 +84,13 @@ export default function App() {
   const detectorRef = useRef(new HandWaveDetector())
   const runningDetectorRef = useRef(new RunningDetector())
   const kinectRef = useRef<KinectSensor | null>(null)
+
+  const isGameActive = phase === 'playing' || phase === 'countdown'
+
+  const toggleView = () => {
+    if (isGameActive) return
+    setView((v) => v === 'game' ? 'setting' : 'game')
+  }
 
   const connectKinect = () => {
     const sensor = new KinectSensor((frame) => {
@@ -132,6 +139,7 @@ export default function App() {
   sensitivityRef.current = sensitivity
   phaseRef.current = phase
   sensorModeRef.current = sensorMode
+
   useEffect(() => { phaserRef.current?.events.emit('charge', charge) }, [charge])
 
   useEffect(() => {
@@ -214,7 +222,9 @@ export default function App() {
     detector.addEventListener('run-cycle', onCycle)
     return () => detector.removeEventListener('run-cycle', onCycle)
   }, [])
+
   useEffect(() => () => kinectRef.current?.stop(), [])
+
   useEffect(() => {
     const detector = detectorRef.current
     const onWave = () => {
@@ -267,83 +277,111 @@ export default function App() {
 
   return <main className="app-shell">
     <div className="grain" aria-hidden="true" />
+
+    {/* ── TOPBAR ── */}
     <header className="topbar">
-      <a className="brand" href="#home" onClick={(event) => { event.preventDefault(); setPhase('welcome') }}><span className="brand-mark"><BatteryCharging size={19} /></span> VOLT / PLAY</a>
-      <div className="topbar-right"><span className="edition"><span className="live-dot" /> MOTION ARCADE <i>·</i> 001</span><button className="icon-button fullscreen" onClick={toggleFullscreen} aria-label="Toggle fullscreen"><Expand size={17} /></button></div>
+      <a className="brand" href="#home" onClick={(event) => { event.preventDefault(); setPhase('welcome') }}>
+        <span className="brand-mark"><BatteryCharging size={19} /></span> VOLT / PLAY
+      </a>
+      <div className="topbar-right">
+        <span className="edition"><span className="live-dot" /> MOTION ARCADE <i>·</i> 001</span>
+        <button
+          className={`setting-toggle${isGameActive ? ' disabled' : ''}${view === 'setting' ? ' active' : ''}`}
+          onClick={toggleView}
+          disabled={isGameActive}
+          aria-label={view === 'setting' ? 'Kembali ke game' : 'Buka setting'}
+        >
+          {view === 'setting' ? (
+            <><Settings size={14} /> SETTING <ChevronRight size={13} /></>
+          ) : (
+            <><ChevronLeft size={13} /> SETTING</>
+          )}
+        </button>
+        <button className="icon-button fullscreen" onClick={toggleFullscreen} aria-label="Toggle fullscreen">
+          <Expand size={17} />
+        </button>
+      </div>
     </header>
 
-    <section className="stage">
-      <div className="stage-copy">
-        <div className="eyebrow"><span className="eyebrow-line" /> THE ENERGY IS YOURS</div>
-        <p className="lede">Run in place.<br />Charge the battery.</p>
-        <div className="challenge-tag"><Hand size={15} /><span>CHALLENGE 01</span><b>RUNNING IN PLACE</b></div>
-      </div>
-
-      <div className="game-panel">
-        <div className="panel-head"><div><span className="panel-label">LIVE CHALLENGE</span><span className="panel-title">Charge sequence</span></div><span className="session-code">BR—001</span></div>
-        <div className="game-display">
-          <div className="display-orbit orbit-one" /><div className="display-orbit orbit-two" />
-          <div className="battery-wrap"><div className="phaser-holder" ref={gameHostRef} /><div className="battery-cap" /></div>
-          <div className="charge-readout"><span className="charge-number">{String(charge).padStart(2, '0')}</span><span className="charge-unit">%</span></div>
-          <div className="display-bottom"><span>ENERGY LEVEL</span><span>{charge < 30 ? 'LOW' : charge < 70 ? 'BUILDING' : 'ALMOST THERE'}</span></div>
-          {phase === 'countdown' && <div className="countdown-overlay"><span>GET READY</span><strong>{countdown || 'GO!'}</strong></div>}
-          {phase === 'won' && <div className="result-overlay"><Sparkles size={22} /><span>FULLY CHARGED</span><strong>{finalScore} PTS</strong><small>COMPLETED IN {minute}:{second}</small></div>}
-        </div>
-        <div className="game-stats"><div className="stat"><span className="stat-icon"><Timer size={16} /></span><div><small>TIME ELAPSED</small><strong>{minute}:{second}</strong></div></div><div className="stat-divider" /><div className="stat"><span className="stat-icon wave-icon"><Hand size={16} /></span><div><small>{sensorMode === 'kinect' ? 'RUN CYCLES' : 'WAVES'}</small><strong>{String(sensorMode === 'kinect' ? runCycles : waves).padStart(2, '0')} <small className="goal">RUNS</small></strong></div></div><button className="reset-button" onClick={beginGame} aria-label="Reset game"><RotateCcw size={16} /></button></div>
-      </div>
-
-      <aside className="side-rail"><span>MOVE TO CHARGE</span><div className="rail-mark"><span>01</span><i /></div><span>UNTIL FULL</span></aside>
-    </section>
-
-    <section className="control-deck">
-      <div className="sensor-mode-switch"><span className="panel-label">INPUT MODE</span><button className="camera-toggle" onClick={() => setSensorMode('kinect')} aria-pressed={sensorMode === 'kinect'} disabled={phase === 'playing' || phase === 'countdown'}>KINECT RUN</button><button className="camera-toggle" onClick={() => setSensorMode('webcam')} aria-pressed={sensorMode === 'webcam'} disabled={phase === 'playing' || phase === 'countdown'}>WEBCAM WAVE</button></div>
-      
-      <div className="camera-card kinect-card">
-        <div className="camera-header">
-          <div className="camera-heading">
-            <span className={`camera-indicator ${kinectStatus === 'connected' ? 'active' : kinectStatus}`} />
-            <div>
-              <strong>KINECT V1 LINK</strong>
-              <small>{kinectMessage}</small>
-            </div>
+    {/* ── VIEW: GAME (DOM tetap ada di memori agar Phaser baterai tidak di-destroy) ── */}
+    <div className="game-view-container" style={{ display: view === 'game' ? 'contents' : 'none' }}>
+      <section className="stage">
+        <div className="game-panel">
+          <div className="panel-head">
+            <div><span className="panel-label">LIVE CHALLENGE</span><span className="panel-title">Charge sequence</span></div>
+            <span className="session-code">BR—001</span>
           </div>
-          <button className="camera-toggle" onClick={kinectStatus === 'connected' ? disconnectKinect : connectKinect}>
-            <Camera size={15} /> {kinectStatus === 'connected' ? 'DISCONNECT' : 'CONNECT'}
-          </button>
+          <div className="game-display">
+            <div className="display-orbit orbit-one" /><div className="display-orbit orbit-two" />
+            <div className="battery-wrap"><div className="phaser-holder" ref={gameHostRef} /><div className="battery-cap" /></div>
+            <div className="charge-readout"><span className="charge-number">{String(charge).padStart(2, '0')}</span><span className="charge-unit">%</span></div>
+            <div className="display-bottom"><span>ENERGY LEVEL</span><span>{charge < 30 ? 'LOW' : charge < 70 ? 'BUILDING' : 'ALMOST THERE'}</span></div>
+            {phase === 'countdown' && <div className="countdown-overlay"><span>GET READY</span><strong>{countdown || 'GO!'}</strong></div>}
+            {phase === 'won' && <div className="result-overlay"><Sparkles size={22} /><span>FULLY CHARGED</span><strong>{finalScore} PTS</strong><small>COMPLETED IN {minute}:{second}</small></div>}
+          </div>
+          <div className="game-stats">
+            <div className="stat"><span className="stat-icon"><Timer size={16} /></span><div><small>TIME ELAPSED</small><strong>{minute}:{second}</strong></div></div>
+            <div className="stat-divider" />
+            <div className="stat"><span className="stat-icon wave-icon"><Hand size={16} /></span><div><small>{sensorMode === 'kinect' ? 'RUN CYCLES' : 'WAVES'}</small><strong>{String(sensorMode === 'kinect' ? runCycles : waves).padStart(2, '0')} <small className="goal">RUNS</small></strong></div></div>
+            <button className="reset-button" onClick={beginGame} aria-label="Reset game"><RotateCcw size={16} /></button>
+          </div>
         </div>
 
-        <div className={`skeleton-preview ${showKinectPreview ? 'visible' : ''}`}>
-          <SkeletonPreview
-            frame={latestKinectFrame}
-            isConnected={kinectStatus === 'connected'}
-            isCalibrated={isKinectCalibrated}
-            calibrationMessage={calibrationMessage}
-            kneeLiftThresholdMeters={0.1}
-          />
-        </div>
+        <aside className="side-rail"><span>MOVE TO CHARGE</span><div className="rail-mark"><span>01</span><i /></div><span>UNTIL FULL</span></aside>
+      </section>
 
-        <div className="camera-foot">
-          <span><ShieldCheck size={13} /> {calibrationMessage}</span>
-          <button onClick={() => setShowKinectPreview((value) => !value)}>
-            {showKinectPreview ? 'HIDE PREVIEW' : 'SHOW PREVIEW'}
+      <div className="launch-row">
+        <div className="launch-card">
+          <div className="launch-orb"><span /></div>
+          <span className="launch-kicker">READY WHEN YOU ARE</span>
+          <button className="start-button" onClick={beginGame} disabled={phase === 'countdown' || phase === 'playing'}>
+            <span>{phase === 'won' || phase === 'lost' ? 'PLAY AGAIN' : 'START GAME'}</span>
+            <ChevronRight size={19} />
           </button>
+          <p>
+            <ShieldCheck size={12} />
+            {sensorMode === 'kinect'
+              ? (kinectStatus === 'connected' ? calibrationMessage : 'Connect Kinect and complete calibration')
+              : (cameraStatus === 'active' ? 'WEBCAM TRACKING READY' : 'Connect webcam for webcam mode')}
+          </p>
         </div>
       </div>
+    </div>
 
-      <div className="camera-card">
-        <div className="camera-header"><div className="camera-heading"><span className={`camera-indicator ${cameraStatus}`} /><div><strong>CAMERA LINK</strong><small>{cameraMessage}</small></div></div><button className="camera-toggle" onClick={cameraStatus === 'active' ? stopCamera : startCamera} disabled={cameraBusy}>{cameraStatus === 'active' ? <><CameraOff size={15} /> DISCONNECT</> : <><Camera size={15} /> {cameraBusy ? 'CONNECTING...' : 'CONNECT'}</>}</button></div>
-        <div className={`camera-preview ${cameraStatus === 'active' && showPreview ? 'visible' : ''}`}>
-          <video ref={videoRef} autoPlay muted playsInline aria-label="Camera preview" />
-          <canvas ref={landmarkCanvasRef} className="landmark-overlay" aria-hidden="true" />
-          {cameraStatus !== 'active' && <div className="preview-placeholder"><Camera size={18} /><span>CAMERA PREVIEW</span></div>}
-          {cameraStatus === 'active' && <span className="preview-live"><i /> LIVE</span>}
-        </div>
-        <div className="camera-foot"><span><ShieldCheck size={13} /> VIDEO STAYS ON DEVICE <b>{handDetected ? ' · HAND DETECTED' : ''}</b></span><button onClick={() => setShowPreview((value) => !value)}>{showPreview ? 'HIDE PREVIEW' : 'SHOW PREVIEW'}</button></div>
-      </div>
+    {/* ── VIEW: SETTING (DOM tetap ada di memori agar video/webcam hand tracking tidak terputus) ── */}
+    <div className="setting-view-container" style={{ display: view === 'setting' ? 'block' : 'none' }}>
+      <SettingsView
+        sensorMode={sensorMode}
+        onSelectSensorMode={setSensorMode}
+        isGameActive={isGameActive}
+        kinectStatus={kinectStatus}
+        kinectMessage={kinectMessage}
+        calibrationMessage={calibrationMessage}
+        latestKinectFrame={latestKinectFrame}
+        showKinectPreview={showKinectPreview}
+        isKinectCalibrated={isKinectCalibrated}
+        onConnectKinect={connectKinect}
+        onDisconnectKinect={disconnectKinect}
+        onToggleKinectPreview={() => setShowKinectPreview((v) => !v)}
+        cameraStatus={cameraStatus}
+        cameraMessage={cameraMessage}
+        cameraBusy={cameraBusy}
+        showWebcamPreview={showPreview}
+        handDetected={handDetected}
+        videoRef={videoRef}
+        landmarkCanvasRef={landmarkCanvasRef}
+        onStartCamera={startCamera}
+        onStopCamera={stopCamera}
+        onToggleWebcamPreview={() => setShowPreview((v) => !v)}
+        sensitivity={sensitivity}
+        onChangeSensitivity={setSensitivity}
+      />
+    </div>
 
-      <div className="instructions-card"><div className="instructions-top"><span className="panel-label">HOW TO PLAY</span><span className="step-count">01 <i>/</i> 03</span></div><div className="instruction-main"><div className="instruction-icon"><Hand size={27} /></div><div><h2>Run it.<br /><em>Charge it.</em></h2><p>Stand where Kinect can see your full body, calibrate, then alternate knee lifts. Each valid run cycle adds 2%.</p></div></div><div className="instructions-bottom"><label htmlFor="sensitivity">SENSITIVITY <span>{Math.round(sensitivity * 100)}%</span></label><input id="sensitivity" type="range" min="6" max="24" value={Math.round(sensitivity * 100)} onChange={(event) => setSensitivity(Number(event.target.value) / 100)} /><span className="sensor-label">SENSOR <b>KINECT V1 / SKELETON TRACKING</b></span></div></div>
-      <div className="launch-card"><div className="launch-orb"><span /></div><span className="launch-kicker">READY WHEN YOU ARE</span><button className="start-button" onClick={beginGame} disabled={phase === 'countdown' || phase === 'playing'}><span>{phase === 'won' || phase === 'lost' ? 'PLAY AGAIN' : 'START GAME'}</span><ChevronRight size={19} /></button><p><ShieldCheck size={12} /> {sensorMode === 'kinect' ? (kinectStatus === 'connected' ? calibrationMessage : 'Connect Kinect and complete calibration') : (cameraStatus === 'active' ? 'WEBCAM TRACKING READY' : 'Connect webcam for webcam mode')}</p></div>
-    </section>
-    <footer className="footer"><span>BATTERY RUSH <i>©</i> 2026</span><span>NO DATA STORED <b>·</b> ALL PLAY, NO PLUG</span><a href="#about" onClick={(event) => event.preventDefault()}>BUILT FOR MOVEMENT <ChevronRight size={12} /></a></footer>
+    <footer className="footer">
+      <span>BATTERY RUSH <i>©</i> 2026</span>
+      <span>NO DATA STORED <b>·</b> ALL PLAY, NO PLUG</span>
+      <a href="#about" onClick={(event) => event.preventDefault()}>BUILT FOR MOVEMENT <ChevronRight size={12} /></a>
+    </footer>
   </main>
 }

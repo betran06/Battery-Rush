@@ -6,7 +6,7 @@ import { CameraManager } from '../sensors/webcam/CameraManager'
 import { HandWaveDetector } from '../sensors/detection/HandWaveDetector'
 import { RunningDetector } from '../sensors/detection/RunningDetector'
 import { KinectSensor, type KinectConnectionState } from '../sensors/kinect/KinectSensor'
-import { SettingsView } from './SettingsView'
+import { SettingsView, type DisplayOrientation } from './SettingsView'
 import type { CameraStatus, GamePhase, KinectSkeletonFrame } from '../types/game'
 
 const CHARGE_PER_WAVE = 10
@@ -57,6 +57,23 @@ class BatteryScene extends Phaser.Scene {
 
 export default function App() {
   const [view, setView] = useState<'game' | 'setting'>('game')
+  const [orientation, setOrientation] = useState<DisplayOrientation>(() => {
+    try {
+      const saved = localStorage.getItem('kiosk_orientation')
+      return (saved === 'portrait' || saved === 'landscape') ? saved : 'landscape'
+    } catch {
+      return 'landscape'
+    }
+  })
+
+  const handleSelectOrientation = (mode: DisplayOrientation) => {
+    setOrientation(mode)
+    try {
+      localStorage.setItem('kiosk_orientation', mode)
+    } catch {
+      // ignore
+    }
+  }
   const [cameraStatus, setCameraStatus] = useState<CameraStatus>('idle')
   const [sensorMode, setSensorMode] = useState<'kinect' | 'webcam'>('kinect')
   const [kinectStatus, setKinectStatus] = useState<KinectConnectionState>('disconnected')
@@ -275,7 +292,7 @@ export default function App() {
   const minute = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0')
   const second = String(elapsedSeconds % 60).padStart(2, '0')
 
-  return <main className="app-shell">
+  return <main className={`app-shell mode-${orientation}`}><div className="orientation-indicator" aria-hidden="true" />
     <div className="grain" aria-hidden="true" />
 
     {/* ── TOPBAR ── */}
@@ -351,6 +368,8 @@ export default function App() {
     {/* ── VIEW: SETTING (DOM tetap ada di memori agar video/webcam hand tracking tidak terputus) ── */}
     <div className="setting-view-container" style={{ display: view === 'setting' ? 'block' : 'none' }}>
       <SettingsView
+        orientation={orientation}
+        onSelectOrientation={handleSelectOrientation}
         sensorMode={sensorMode}
         onSelectSensorMode={setSensorMode}
         isGameActive={isGameActive}

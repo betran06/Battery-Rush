@@ -1,32 +1,94 @@
-﻿# Battery Rush
+﻿<h1 align="center">Battery Rush</h1>
+<p align="center">Game kiosk berbasis gerakan: berlari di tempat, isi baterai, dan raih 100%!</p>
+<p align="center">
+    <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=20232A" alt="React 19">
+    <img src="https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5.7">
+    <img src="https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white" alt="Vite 6">
+    <img src="https://img.shields.io/badge/Phaser-3-EFEFEF?logo=phaser&logoColor=black" alt="Phaser 3">
+  </p>
 
-Battery Rush is a React, TypeScript, Vite, and Phaser motion game. Kinect V1 running-in-place is the primary challenge; the existing webcam/MediaPipe hand-wave adapter remains available in the UI. Kinect mode works without webcam permission or MediaPipe model access.
+Battery Rush adalah game kiosk interaktif yang mengubah gerakan pemain menjadi energi. Dalam mode Kinect, pemain berlari di tempat dan mengangkat lutut secara bergantian untuk mengisi baterai virtual. Mode webcam dengan gerakan tangan juga tersedia sebagai alternatif.
 
-## Requirements
+---
 
-- Node.js 20.19+ or 22.12+ and npm.
-- Windows with Kinect for Windows V1, Kinect Runtime/SDK 1.8, and the .NET Framework 4.8 Developer Pack for the bridge.
-- A modern desktop browser and the local Kinect Bridge at `ws://127.0.0.1:8181/kinect`.
+## Fitur Utama
 
-## Run
+### Kinect Run
+- Menggunakan Kinect for Windows V1 untuk melacak skeleton dan gerakan kaki.
+- Kalibrasi berdiri sebelum permainan dimulai.
+- Mendeteksi gerakan lutut kiri dan kanan bergantian untuk mengisi baterai.
+- Berkomunikasi dengan aplikasi bridge lokal melalui WebSocket.
 
-```sh
+### Webcam Wave
+- Mode alternatif menggunakan webcam dan MediaPipe untuk deteksi gerakan tangan.
+- Menggunakan model MediaPipe lokal; mode Kinect tidak memerlukan akses webcam.
+
+### Pengalaman Game
+- Antarmuka dan state sesi dikelola oleh React.
+- Phaser menangani visual game dan tampilan baterai.
+- Parameter permainan awal dapat dikonfigurasi, termasuk ambang angkat lutut dan jumlah pengisian.
+
+---
+
+## Teknologi yang Digunakan
+
+| Area | Teknologi | Peran |
+|---|---|---|
+| Antarmuka | React 19 | Membangun UI dan mengelola state sesi game. |
+| Bahasa frontend | TypeScript 5.7 | Memberi tipe pada kode, data sensor, dan event permainan. |
+| Development dan build | Vite 6 | Menjalankan development server dan membangun frontend. |
+| Game rendering | Phaser 3 | Merender elemen visual dan tampilan permainan. |
+| Styling | Tailwind CSS 4 | Mendukung styling antarmuka. |
+| Deteksi webcam | MediaPipe Tasks Vision | Melacak gerakan tangan untuk mode Webcam Wave. |
+| Kinect Bridge | C# dan .NET Framework 4.8 | Menghubungkan Kinect SDK ke aplikasi browser melalui bridge lokal. |
+| Sensor Kinect | Kinect SDK 1.8 | Membaca data skeleton dari Kinect for Windows V1. |
+| Komunikasi | WebSocket | Mengirim data skeleton dari bridge ke frontend secara lokal. |
+
+---
+
+## Persyaratan
+
+**Untuk menjalankan frontend:**
+- Node.js 20.19+ atau 22.12+ dan npm.
+- Browser desktop modern.
+
+**Untuk mode Kinect:**
+- Kinect for Windows V1 dengan adaptor daya yang sesuai.
+- Windows dengan Kinect Runtime/SDK 1.8.
+- .NET Framework 4.8 Developer Pack dan Visual Studio untuk menjalankan bridge.
+
+Mode Kinect terhubung ke bridge lokal di `ws://127.0.0.1:8181/kinect`. Mode Webcam Wave memerlukan webcam.
+
+---
+
+## Instalasi dan Menjalankan
+
+```bash
 npm install
 npm run dev
+```
+
+Buka alamat lokal yang ditampilkan Vite di terminal. Untuk membuat production build frontend:
+
+```bash
 npm run build
 ```
 
-Start `kinect-bridge/KinectBridge/KinectBridge.csproj` from Visual Studio, then open the Vite localhost page and connect the Kinect panel. Full-body tracking starts a 2-second standing calibration; after it completes, start the round and alternate knee lifts. The experimental defaults are 10 cm knee lift, 250 ms minimum cycle interval, and 2% battery per valid cycle.
+### Menjalankan Kinect Run
 
-Webcam controls remain as a separate fallback and still use the local MediaPipe assets/model. Neither sensor sends video to a server.
+1. Sambungkan Kinect dan jalankan `kinect-bridge/KinectBridge/KinectBridge.csproj` menggunakan Visual Studio.
+2. Jalankan frontend, pilih **KINECT RUN**, lalu tekan **CONNECT**.
+3. Tunggu sampai skeleton terlacak dan kalibrasi berdiri selama 2 detik selesai.
+4. Mulai permainan dan angkat lutut kiri-kanan secara bergantian.
 
-## Verification status
+Nilai awal deteksi bersifat eksperimental: ambang angkat lutut 10 cm, interval minimum 250 ms, dan pengisian 2% per siklus.
 
-Frontend production build has been run. Kinect Bridge compilation, Windows 11 runtime, WebSocket hardware connection, calibration, and real running cycles have NOT HARDWARE VERIFIED. See `docs/TESTING.md` and `docs/KINECT_BRIDGE.md`.
-## Menghubungkan Kinect
+---
 
-Kinect V1 adalah sensor utama untuk mode **KINECT RUN**. Sambungkan perangkat, jalankan bridge C# dari Visual Studio, lalu buka aplikasi dan pilih mode tersebut. Tekan **CONNECT** pada kartu Kinect; setelah skeleton tubuh terlacak, berdiri tegak selama kalibrasi 2 detik. Tombol mulai hanya menerima ronde Kinect setelah bridge tersambung dan kalibrasi selesai. Langkah build, endpoint, dan troubleshooting tersedia di `docs/KINECT_BRIDGE.md` serta `docs/KINECT_SETUP.md`.
+## Status Pengembangan
 
-Mode webcam-wave tetap tersedia sebagai alternatif dan tidak dibutuhkan saat mode Kinect dipilih.
+Frontend menyediakan production build melalui `npm run build`. Build dan penggunaan Kinect Bridge, koneksi WebSocket dengan sensor, kalibrasi, serta gameplay menggunakan perangkat Kinect **belum diverifikasi pada perangkat keras**.
 
-Untuk memakai fallback webcam, pilih **WEBCAM WAVE** pada pemilih mode. Tracking webcam tetap menggunakan model MediaPipe lokal `public/models/hand_landmarker.task`; mode Kinect tidak membutuhkan izin kamera atau file model tersebut.
+---
+
+<p align="center">Dibuat untuk pengalaman game kiosk yang aktif dan interaktif.</p>

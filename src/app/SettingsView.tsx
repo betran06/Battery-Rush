@@ -1,10 +1,16 @@
 ﻿import type { RefObject } from 'react'
-import { Camera, CameraOff, Hand, ShieldCheck } from 'lucide-react'
+import { Camera, CameraOff, Hand, Monitor, ShieldCheck, Smartphone } from 'lucide-react'
 import { SkeletonPreview } from './SkeletonPreview'
 import type { CameraStatus, KinectSkeletonFrame } from '../types/game'
 import type { KinectConnectionState } from '../sensors/kinect/KinectSensor'
 
+export type DisplayOrientation = 'landscape' | 'portrait'
+
 export interface SettingsViewProps {
+  // Orientation mode
+  orientation: DisplayOrientation
+  onSelectOrientation: (orientation: DisplayOrientation) => void
+
   // Sensor mode
   sensorMode: 'kinect' | 'webcam'
   onSelectSensorMode: (mode: 'kinect' | 'webcam') => void
@@ -39,6 +45,8 @@ export interface SettingsViewProps {
 }
 
 export function SettingsView({
+  orientation,
+  onSelectOrientation,
   sensorMode,
   onSelectSensorMode,
   isGameActive,
@@ -67,26 +75,52 @@ export function SettingsView({
   return (
     <section className="setting-panel">
       <div className="setting-panel-head">
-        <span className="panel-label">SENSOR &amp; INPUT CONFIGURATION</span>
-        <span className="sensor-mode-switch">
-          <span className="panel-label">INPUT MODE</span>
-          <button
-            className="camera-toggle"
-            onClick={() => onSelectSensorMode('kinect')}
-            aria-pressed={sensorMode === 'kinect'}
-            disabled={isGameActive}
-          >
-            KINECT RUN
-          </button>
-          <button
-            className="camera-toggle"
-            onClick={() => onSelectSensorMode('webcam')}
-            aria-pressed={sensorMode === 'webcam'}
-            disabled={isGameActive}
-          >
-            WEBCAM WAVE
-          </button>
-        </span>
+        <span className="panel-label">KIOSK CONFIGURATION</span>
+        <div className="setting-controls-top">
+          {/* Orientation switch */}
+          <span className="orientation-switch">
+            <span className="panel-label">ORIENTATION</span>
+            <button
+              className="camera-toggle"
+              onClick={() => onSelectOrientation('landscape')}
+              aria-pressed={orientation === 'landscape'}
+              type="button"
+            >
+              <Monitor size={12} /> LANDSCAPE
+            </button>
+            <button
+              className="camera-toggle"
+              onClick={() => onSelectOrientation('portrait')}
+              aria-pressed={orientation === 'portrait'}
+              type="button"
+            >
+              <Smartphone size={12} /> PORTRAIT
+            </button>
+          </span>
+
+          {/* Input Mode switch */}
+          <span className="sensor-mode-switch">
+            <span className="panel-label">INPUT MODE</span>
+            <button
+              className="camera-toggle"
+              onClick={() => onSelectSensorMode('kinect')}
+              aria-pressed={sensorMode === 'kinect'}
+              disabled={isGameActive}
+              type="button"
+            >
+              KINECT RUN
+            </button>
+            <button
+              className="camera-toggle"
+              onClick={() => onSelectSensorMode('webcam')}
+              aria-pressed={sensorMode === 'webcam'}
+              disabled={isGameActive}
+              type="button"
+            >
+              WEBCAM WAVE
+            </button>
+          </span>
+        </div>
       </div>
 
       <div className="setting-grid">
@@ -103,6 +137,7 @@ export function SettingsView({
             <button
               className="camera-toggle"
               onClick={kinectStatus === 'connected' ? onDisconnectKinect : onConnectKinect}
+              type="button"
             >
               <Camera size={15} /> {kinectStatus === 'connected' ? 'DISCONNECT' : 'CONNECT'}
             </button>
@@ -118,7 +153,7 @@ export function SettingsView({
           </div>
           <div className="camera-foot">
             <span><ShieldCheck size={13} /> {calibrationMessage}</span>
-            <button onClick={onToggleKinectPreview}>
+            <button onClick={onToggleKinectPreview} type="button">
               {showKinectPreview ? 'HIDE PREVIEW' : 'SHOW PREVIEW'}
             </button>
           </div>
@@ -135,6 +170,7 @@ export function SettingsView({
               className="camera-toggle"
               onClick={cameraStatus === 'active' ? onStopCamera : onStartCamera}
               disabled={cameraBusy}
+              type="button"
             >
               {cameraStatus === 'active' ? <><CameraOff size={15} /> DISCONNECT</> : <><Camera size={15} /> {cameraBusy ? 'CONNECTING...' : 'CONNECT'}</>}
             </button>
@@ -147,7 +183,7 @@ export function SettingsView({
           </div>
           <div className="camera-foot">
             <span><ShieldCheck size={13} /> VIDEO STAYS ON DEVICE <b>{handDetected ? ' · HAND DETECTED' : ''}</b></span>
-            <button onClick={onToggleWebcamPreview}>{showWebcamPreview ? 'HIDE PREVIEW' : 'SHOW PREVIEW'}</button>
+            <button onClick={onToggleWebcamPreview} type="button">{showWebcamPreview ? 'HIDE PREVIEW' : 'SHOW PREVIEW'}</button>
           </div>
         </div>
 

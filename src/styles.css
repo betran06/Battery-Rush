@@ -50,3 +50,102 @@
   .launch-row .start-button{grid-column:1;grid-row:3;margin-top:10px;width:100%}
   .launch-row .launch-card p{grid-row:2}
 }
+/* ── SETTING TOP CONTROLS & ORIENTATION SWITCH ── */
+.setting-controls-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.orientation-switch{display:flex;align-items:center;gap:6px}
+.orientation-switch .panel-label{margin-right:2px;font-size:8px;color:#8e9a8e}
+.orientation-switch button{display:inline-flex;align-items:center;gap:4px}
+.orientation-switch button[aria-pressed=true]{border-color:var(--lime);color:var(--lime)}
+
+/* ═════════════════════════════════════════════════════
+   KIOSK MODE: PORTRAIT (Tegak / 9:16 Kiosk Display)
+   ═════════════════════════════════════════════════════ */
+.app-shell.mode-portrait{
+  max-width: 680px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+  border-left: 1px solid rgba(190, 205, 190, 0.08);
+  border-right: 1px solid rgba(190, 205, 190, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell.mode-portrait .stage{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-height: 480px;
+  padding: 24px 0 20px;
+  width: 100%;
+}
+
+.app-shell.mode-portrait .game-panel{
+  width: 100%;
+  max-width: 440px;
+}
+
+.app-shell.mode-portrait .game-display{
+  height: 330px;
+}
+
+.app-shell.mode-portrait .side-rail{
+  display: none;
+}
+
+.app-shell.mode-portrait .launch-row{
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto 28px;
+}
+
+.app-shell.mode-portrait .launch-row .launch-card{
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 18px 20px;
+  text-align: center;
+}
+
+.app-shell.mode-portrait .launch-row .launch-card p{
+  justify-content: center;
+  font-size: 8px;
+}
+
+.app-shell.mode-portrait .launch-row .start-button{
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 11px;
+}
+
+/* Portrait Setting Grid */
+.app-shell.mode-portrait .setting-panel{
+  max-width: 540px;
+  margin: 0 auto 30px;
+  width: 100%;
+}
+
+.app-shell.mode-portrait .setting-panel-head{
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.app-shell.mode-portrait .setting-controls-top{
+  width: 100%;
+  justify-content: space-between;
+}
+
+.app-shell.mode-portrait .setting-grid{
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.app-shell.mode-portrait .setting-grid .camera-card,
+.app-shell.mode-portrait .setting-grid .instructions-card{
+  min-height: auto;
+}

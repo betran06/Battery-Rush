@@ -6,3 +6,5 @@ dist
 public/mediapipe/wasm/
 
 .vs/
+
+BatteryRush-Kiosk

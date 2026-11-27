@@ -1,0 +1,8 @@
+C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\bin\Release\app.ico
+C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\bin\Release\KinectBridge.exe
+C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\bin\Release\Microsoft.Kinect.dll
+C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\bin\Release\Microsoft.Kinect.xml
+C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\obj\Release\KinectBridge.csproj.AssemblyReference.cache
+C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\obj\Release\KinectBridge.csproj.CoreCompileInputs.cache
+C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\obj\Release\KinectBr.B4A63152.Up2Date
+C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\obj\Release\KinectBridge.exe

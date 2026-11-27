@@ -15,3 +15,10 @@
 5. Browser dan bridge harus berjalan pada komputer yang sama karena server hanya mendengarkan di `127.0.0.1`.
 
 SDK 1.8 tidak boleh dianggap kompatibel penuh dengan Windows 11 hanya berdasarkan pengenalan perangkat. Verifikasi runtime bridge secara terpisah.
+
+## Catatan Khusus Windows 11 (Driver Camera Code 39)
+Driver kamera Kinect V1 (kinectcam.sys) dapat diblokir oleh fitur **Memory Integrity (Core Isolation)** di Windows 11 dengan gejala error **Code 39** pada Kinect for Windows Camera di Device Manager.
+Solusi:
+1. Buka **Core Isolation** (Isolasi Inti) di Windows Security.
+2. Ubah **Memory Integrity** menjadi **OFF**.
+3. Restart komputer.

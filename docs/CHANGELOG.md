@@ -41,3 +41,13 @@
 - Summary: Menambahkan file icon dummy pp.ico bertema Battery Rush dan mendaftarkannya ke dalam konfigurasi <ApplicationIcon> pada KinectBridge.csproj. Hasil build KinectBridge.exe sekarang otomatis menyertakan icon aplikasi pada Windows Explorer dan taskbar.
 - Reason: Permintaan pengguna untuk menambahkan icon aplikasi ke KinectBridge sehingga executable memiliki logo saat dijalankan.
 - Verification: MSBuild berhasil mengompilasi KinectBridge.csproj dengan switch /win32icon:app.ico (0 Warning, 0 Error). File pp.ico disalin ke folder output in\Debug\app.ico.
+## 2026-11-27 (2)
+- Files: docs/KIOSK_DEPLOYMENT.md (baru), dist/Start-Kiosk.bat (baru), kinect-bridge/KinectBridge/bin/Release/KinectBridge.exe.
+- Summary: Dibuat panduan lengkap deployment dan instalasi untuk menjalankan game Battery Rush di perangkat/PC kiosk lain (docs/KIOSK_DEPLOYMENT.md). Menyertakan script launcher sekali klik dist/Start-Kiosk.bat untuk menjalankan KinectBridge dan membuka browser dalam mode fullscreen kiosk secara otomatis. Dilakukan build Release untuk KinectBridge.exe dengan icon aplikasi.
+- Reason: Permintaan pengguna untuk mendokumentasikan daftar file wajib dan prosedur instalasi di perangkat lain tanpa perlu mode developer.
+- Verification: Build Release C# berhasil tanpa error. File panduan docs/KIOSK_DEPLOYMENT.md dan script launcher dist/Start-Kiosk.bat berhasil dibuat.
+## 2026-11-27 (3)
+- Files: docs/KIOSK_DEPLOYMENT.md, docs/KINECT_SETUP.md.
+- Summary: Menambahkan dokumentasi troubleshooting dan panduan wajib Windows 11 mengenai penonaktifan **Memory Integrity (Core Isolation)**. Menjelaskan akar masalah error driver kamera Code 39 (Windows cannot load the device driver for this hardware) pada Kinect for Windows Camera yang menyebabkan KinectBridge.exe gagal mendeteksi sensor, serta langkah-langkah solusinya (Core Isolation -> Memory Integrity OFF -> Restart PC).
+- Reason: Dokumentasi verifikasi langsung dari pengujian hardware di Windows 11.
+- Verification: File docs/KIOSK_DEPLOYMENT.md dan docs/KINECT_SETUP.md berhasil diperbarui.

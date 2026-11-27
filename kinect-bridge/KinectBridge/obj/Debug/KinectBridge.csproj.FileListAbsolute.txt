@@ -7,3 +7,4 @@ C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\obj\Debug\Kine
 C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\obj\Debug\KinectBr.B4A63152.Up2Date
 C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\obj\Debug\KinectBridge.exe
 C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\obj\Debug\KinectBridge.pdb
+C:\laragon\www\Game-kiosk\battery-rush\kinect-bridge\KinectBridge\bin\Debug\app.ico

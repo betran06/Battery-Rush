@@ -20,3 +20,11 @@ Endpoint lokal: `ws://127.0.0.1:8181/kinect`, port `8181`. Bridge mengirim JSON 
 Pastikan bridge berjalan, alamat dan path tepat, port 8181 tidak dipakai aplikasi lain, serta URL ACL/izin `HttpListener` tidak menolak server. Periksa pesan di console bridge. Jangan menonaktifkan fitur keamanan Windows sebagai langkah pertama.
 
 Build bridge, runtime Windows 11, dan koneksi WebSocket belum diuji dalam sesi ini: **NOT HARDWARE VERIFIED**.
+
+## Icon Aplikasi (app.ico)
+- Proyek KinectBridge.csproj telah dikonfigurasi dengan <ApplicationIcon>app.ico</ApplicationIcon>.
+- File icon dummy berada di kinect-bridge/KinectBridge/app.ico.
+- Untuk mengganti logo aplikasi:
+  1. Siapkan file icon baru berformat .ico dengan nama pp.ico.
+  2. Timpa (*overwrite*) file kinect-bridge/KinectBridge/app.ico.
+  3. Rebuild proyek menggunakan MSBuild atau Visual Studio.

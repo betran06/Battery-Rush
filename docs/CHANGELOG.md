@@ -36,3 +36,8 @@
 - Summary: Membuat dokumentasi komprehensif sistem sensor tangan (Webcam Wave Mode) yang mencakup arsitektur MediaPipe WASM lokal, pelacakan landmark wrist (Landmark 0), algoritma deteksi arah bolak-balik (Direction Flip + Travel Distance), filter getaran mikro (delta < 0.008), mekanisme cooldown anti-spam (450 ms), slider sensitivitas (6%–24%), serta tabel progresi pengisian baterai 10% per wave (10 wave = 100% full). Memperbarui GAMEPLAY_MECHANICS.md dengan ringkasan perhitungan mode sensor tangan.
 - Reason: Menyediakan dokumentasi teknis dan referensi konsep matematika untuk pengembang mengenai deteksi sensor tangan di Battery Rush.
 - Verification: File docs/HAND_WAVE_DETECTOR.md dan pembaruan docs/GAMEPLAY_MECHANICS.md berhasil ditulis dan diverifikasi.
+## 2026-11-27
+- Files: kinect-bridge/KinectBridge/app.ico (baru), kinect-bridge/KinectBridge/KinectBridge.csproj, docs/KINECT_BRIDGE.md.
+- Summary: Menambahkan file icon dummy pp.ico bertema Battery Rush dan mendaftarkannya ke dalam konfigurasi <ApplicationIcon> pada KinectBridge.csproj. Hasil build KinectBridge.exe sekarang otomatis menyertakan icon aplikasi pada Windows Explorer dan taskbar.
+- Reason: Permintaan pengguna untuk menambahkan icon aplikasi ke KinectBridge sehingga executable memiliki logo saat dijalankan.
+- Verification: MSBuild berhasil mengompilasi KinectBridge.csproj dengan switch /win32icon:app.ico (0 Warning, 0 Error). File pp.ico disalin ke folder output in\Debug\app.ico.
